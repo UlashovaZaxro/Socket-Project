@@ -1,12 +1,19 @@
 import type {Request, Response} from "express";
 import  z from "zod";
 import prisma from "../utils/prismaConfig.ts";
+import bcrypt from "bcryptjs";
 
 const registerSchema = z.object({
     fullname : z.string().min(2),
     email: z.email('invalid email'),
     password : z.string().min(5)
 })
+
+const loginSchema = z.object({
+    email: z.email('invalid email'),
+    password : z.string().min(5)
+})
+
 
 export const register = async (req: Request, res: Response) => {
     const result = registerSchema.safeParse(req.body);
@@ -23,8 +30,39 @@ export const register = async (req: Request, res: Response) => {
         return res.status(409).json({message:'this email already exist'})
     }
 
-    console.log(user);
+    const hashedPassword = await bcrypt.hash(inputs.password, 10);
 
+    console.log(hashedPassword);
 
-    res.send({message: "Success Gaga"});
+    const newUser =  await prisma.user.create({
+        data: {
+            fullName: inputs.fullname,
+            email: inputs.email,
+            passwordHash: hashedPassword
+        }
+    });
+
+    res.json({message: "seccess", data: newUser})
+
+    
+
+}
+
+export const login = async(req: Request, res: Response) => {
+    const result = loginSchema.safeParse(req.body);
+
+    if (!result.success) {
+        return res.status(400).json({massage: "Invalid input"})
+    }
+    const inputs = result.data;
+
+    const user = await prisma.user.findUnique({
+        where: {email: inputs.email}
+    });
+
+    if(!user){
+        return res.status(404).json({message: "wrong credentials"})
+    }
+
+    res.json({message: "hello from login route"})
 }
