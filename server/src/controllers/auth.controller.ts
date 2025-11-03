@@ -2,6 +2,7 @@ import type {Request, Response} from "express";
 import  z from "zod";
 import prisma from "../utils/prismaConfig.ts";
 import bcrypt from "bcryptjs";
+import { generateToken } from "../utils/generateToken.ts";
 
 const registerSchema = z.object({
     fullname : z.string().min(2),
@@ -64,5 +65,44 @@ export const login = async(req: Request, res: Response) => {
         return res.status(404).json({message: "wrong credentials"})
     }
 
-    res.json({message: "hello from login route"})
+    const checkPassword = await bcrypt.compare(inputs.password, user.passwordHash);
+    
+    if (!checkPassword) {
+        return res.status(400).json({massage: "wrong credentials"})
+    }
+
+    const accessToken = generateToken(user.id)
+
+    res.json({message: "seccess", token: accessToken})
 }
+
+
+// export const profile = async(req: Request, res: Response) => {
+//     res.json({message: "welcometo profile"})
+
+// }
+
+export const profile = async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId;
+
+        if (!req.file) {
+        return res.status(400).json({ message: "No image uploaded" });
+        }
+
+        const imagePath = `/uploads/${req.file.filename}`;
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: { profileImage: imagePath },
+        });
+
+        res.json({
+        message: "Profile image updated successfully",
+        user: updatedUser,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error updating profile image" });
+    }
+};

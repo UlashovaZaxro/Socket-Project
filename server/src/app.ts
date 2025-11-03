@@ -4,9 +4,11 @@ import dotenv from "dotenv"
 
 export const app = express();
 
-dotenv.config()
-app.use(express.json())
 
+dotenv.config()
+
+app.use(express.static('uploads'))
+app.use(express.json())
 app.use('/api', authRoutes);
 
 export default app 
