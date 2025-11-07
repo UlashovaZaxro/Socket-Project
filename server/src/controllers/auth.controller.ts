@@ -77,32 +77,41 @@ export const login = async(req: Request, res: Response) => {
 }
 
 
-// export const profile = async(req: Request, res: Response) => {
-//     res.json({message: "welcometo profile"})
-
-// }
-
 export const profile = async (req: Request, res: Response) => {
-    try {
-        const userId = req.userId;
+    const imageFileName = req.file?.filename 
+    const userId = req.userId 
+    
 
-        if (!req.file) {
-        return res.status(400).json({ message: "No image uploaded" });
-        }
+    const updatedUser = await prisma.user.update({
+            where: {id : userId},
+            data: {profileImage: imageFileName }
+    })
+    
+    
+    res.json({message:'a user has been updated', user:updatedUser })
+}
 
-        const imagePath = `/uploads/${req.file.filename}`;
+// export const profile = async (req: Request, res: Response) => {
+//     try {
+//         const userId = req.userId;
 
-        const updatedUser = await prisma.user.update({
-            where: { id: userId },
-            data: { profileImage: imagePath },
-        });
+//         if (!req.file) {
+//         return res.status(400).json({ message: "No image uploaded" });
+//         }
 
-        res.json({
-        message: "Profile image updated successfully",
-        user: updatedUser,
-        });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error updating profile image" });
-    }
-};
+//         const imagePath = `/uploads/${req.file.filename}`;
+
+//         const updatedUser = await prisma.user.update({
+//             where: { id: userId },
+//             data: { profileImage: imagePath },
+//         });
+
+//         res.json({
+//         message: "Profile image updated successfully",
+//         user: updatedUser,
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: "Error updating profile image" });
+//     }
+// };
