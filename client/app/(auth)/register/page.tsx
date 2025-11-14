@@ -1,12 +1,16 @@
 "use client";
 import PasswordChecker from "@/features/register/components/PasswordChecker";
-import { Sumana } from "next/font/google";
 import { ChangeEvent, FormEvent, useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+
+
 
 const BASE_URL = "http://localhost:4000/api";
 
 function RegisterPage() {
+    const router = useRouter();
+
     const [password, setPassword] = useState("");
     const [form, setForm] = useState({
         fullname: "",
@@ -24,6 +28,13 @@ function RegisterPage() {
         const data = { ...form, password };
         const res = await axios.post(`${BASE_URL}/register`, data);
         console.log(res);
+
+        if (res.status === 200) {
+            router.push("/login");
+            return
+        }
+        alert("Registration failed. Please try again.");
+
     };
 
     return (

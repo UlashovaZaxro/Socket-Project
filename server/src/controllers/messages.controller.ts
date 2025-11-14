@@ -14,6 +14,19 @@ export const getUsers = async (req: Request, res: Response) => {
     return res.json({message: "seccess", users: users})
 };
 
+export const getUser = async (req: Request, res: Response) => {
+
+    const user = await prisma.user.findUnique({
+        where: {
+            id: req.userId
+        }
+    })
+    
+
+
+    return res.json({message: "seccess", user: user})
+};
+
 
 export const newMessage = async (req: Request, res: Response) => {
     // res.json({message: "seccess from newMessage controller!"});

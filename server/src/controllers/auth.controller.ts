@@ -73,7 +73,8 @@ export const login = async(req: Request, res: Response) => {
 
     const accessToken = generateToken(user.id)
 
-    res.json({message: "seccess", token: accessToken})
+    res.json({message: "seccess", token: accessToken, user})
+
 }
 
 
